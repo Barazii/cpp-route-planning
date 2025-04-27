@@ -22,6 +22,9 @@ set(IO2D_WITHOUT_TESTS 1)
 
 # Add the pugixml and GoogleTest library subdirectories
 add_subdirectory(thirdparty/pugixml)
+
+# Disable warnings as errors for GTest
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-maybe-uninitialized")
 add_subdirectory(thirdparty/googletest)
 
 # Add project executable
