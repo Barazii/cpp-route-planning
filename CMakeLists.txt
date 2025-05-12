@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.11.3)
+project(OSM_A_star_search)
 
 # Set the C++ standard we will use
 set(CMAKE_CXX_STANDARD 17)
@@ -8,8 +9,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 # Locate project prerequisites
 find_package(io2d REQUIRED)
-find_package(Cairo)
-find_package(GraphicsMagick)
+find_package(Cairo REQUIRED)
+find_package(GraphicsMagick REQUIRED)
 
 # Set IO2D flags
 set(IO2D_WITHOUT_SAMPLES 1)

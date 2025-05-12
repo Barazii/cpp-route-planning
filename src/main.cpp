@@ -1,3 +1,4 @@
+
 #include <optional>
 #include <fstream>
 #include <iostream>
@@ -10,37 +11,6 @@
 
 using namespace std::experimental;
 
-void clear_input_buffer()
-{
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cout << "Invalid input. Enter again: ";
-}
-
-float get_input(std::string title)
-{
-    float coordinate;
-
-    // Validate input type
-    std::cout << title << ": ";
-    while (!(std::cin >> coordinate))
-    {
-        clear_input_buffer();
-    }
-
-    // Validate input range
-    while (coordinate < 0.0 || coordinate > 100.0)
-    {
-        std::cout << "> Invalid input. Provide " << title << " from 0 to 100: ";
-        while (!(std::cin >> coordinate))
-        {
-            clear_input_buffer();
-        }
-    }
-
-    return coordinate;
-}
-
 static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
 {
     std::ifstream is{path, std::ios::binary | std::ios::ate};
@@ -51,8 +21,7 @@ static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
     std::vector<std::byte> contents(size);
 
     is.seekg(0);
-    void * tempptr = contents.data();
-    is.read(static_cast<char *>(tempptr), size);
+    is.read((char *)contents.data(), size);
 
     if (contents.empty())
         return std::nullopt;
@@ -90,19 +59,21 @@ int main(int argc, const char **argv)
     // TODO 1: Declare floats `start_x`, `start_y`, `end_x`, and `end_y` and get
     // user input for these values using std::cin. Pass the user input to the
     // RoutePlanner object below in place of 10, 10, 90, 90.
-
-    float start_x, start_y, end_x, end_y;
-    std::cout << "Provide the route coordinates from 0 to 100" << std::endl;
-    start_x = get_input("Start Longitude");
-    start_y = get_input("Start Latitude");
-    end_x = get_input("End Longitude");
-    end_y = get_input("End Latitude");
+    float x_start, y_start, x_end, y_end;
+    std::cout << "Enter x start position: ";
+    std::cin >> x_start;
+    std::cout << "Enter y start position: ";
+    std::cin >> y_start;
+    std::cout << "Enter x end position: ";
+    std::cin >> x_end;
+    std::cout << "Enter y end position: ";
+    std::cin >> y_end;
 
     // Build Model.
     RouteModel model{osm_data};
 
     // Create RoutePlanner object and perform A* search.
-    RoutePlanner route_planner{model, start_x, start_y, end_x, end_y};
+    RoutePlanner route_planner{model, x_start, y_start, x_end, y_end};
     route_planner.AStarSearch();
 
     std::cout << "Distance: " << route_planner.GetDistance() << " meters. \n";
