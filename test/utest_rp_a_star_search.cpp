@@ -7,7 +7,7 @@
 #include "../src/route_planner.h"
 
 
-static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
+static std::optional<std::vector<std::byte>> ReadFile(std::string &&path)
 {   
     std::ifstream is{path, std::ios::binary | std::ios::ate};
     if( !is )
@@ -21,12 +21,12 @@ static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
 
     if( contents.empty() )
         return std::nullopt;
-    return std::move(contents);
+    return contents;
 }
 
-std::vector<std::byte> ReadOSMData(const std::string &path) {
+std::vector<std::byte> ReadOSMData(std::string &&path) {
     std::vector<std::byte> osm_data;
-    auto data = ReadFile(path);
+    auto data = ReadFile(std::move(path));
     if( !data ) {
         std::cout << "Failed to read OSM data." << std::endl;
     } else {
@@ -42,7 +42,7 @@ std::vector<std::byte> ReadOSMData(const std::string &path) {
 class RoutePlannerTest : public ::testing::Test {
   protected:
     std::string osm_data_file = "../map.osm";
-    std::vector<std::byte> osm_data = ReadOSMData(osm_data_file);
+    std::vector<std::byte> osm_data = ReadOSMData(std::move(osm_data_file));
     RouteModel model{osm_data};
     RoutePlanner route_planner{model, 10, 10, 90, 90};
     

@@ -11,7 +11,7 @@
 
 using namespace std::experimental;
 
-static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
+static std::optional<std::vector<std::byte>> ReadFile(std::string &&path)
 {
     std::ifstream is{path, std::ios::binary | std::ios::ate};
     if (!is)
@@ -25,7 +25,7 @@ static std::optional<std::vector<std::byte>> ReadFile(const std::string &path)
 
     if (contents.empty())
         return std::nullopt;
-    return std::move(contents);
+    return contents;
 }
 
 int main(int argc, const char **argv)
@@ -49,7 +49,7 @@ int main(int argc, const char **argv)
     if (osm_data.empty() && !osm_data_file.empty())
     {
         std::cout << "Reading OpenStreetMap data from the following file: " << osm_data_file << std::endl;
-        auto data = ReadFile(osm_data_file);
+        auto data = ReadFile(std::move(osm_data_file));
         if (!data)
             std::cout << "Failed to read." << std::endl;
         else
