@@ -29,8 +29,11 @@ FetchContent_Declare(
 set(BUILD_GMOCK OFF)
 FetchContent_MakeAvailable(googletest)
 
+file(GLOB SRC_FILES src/*.cpp)
+file(GLOB SRC_FILES_FOR_TEST test/utest_rp_a_star_search.cpp src/route_planner.cpp src/model.cpp src/route_model.cpp)
+
 # Add project executable
-add_executable(OSM_A_star_search src/main.cpp src/model.cpp src/render.cpp src/route_model.cpp src/route_planner.cpp)
+add_executable(OSM_A_star_search ${SRC_FILES})
 
 target_link_libraries(OSM_A_star_search
     PRIVATE io2d::io2d
@@ -38,7 +41,7 @@ target_link_libraries(OSM_A_star_search
 )
 
 # Add the testing executable
-add_executable(test test/utest_rp_a_star_search.cpp src/route_planner.cpp src/model.cpp src/route_model.cpp)
+add_executable(test ${SRC_FILES_FOR_TEST})
 
 target_link_libraries(test 
     gtest_main 
