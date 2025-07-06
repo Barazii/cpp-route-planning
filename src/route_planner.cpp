@@ -1,8 +1,12 @@
 #include "route_planner.h"
 #include <algorithm>
+#include "exceptions.h"
 
 RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, float end_x, float end_y) : m_Model(model)
 {
+    if (start_x < 0 || start_x > 100 || start_y < 0 || start_y > 100 || end_x < 0 || end_x > 100 || end_y < 0 || end_y > 100)
+        throw InvalidCoordinatesError("Coordinates must be [0, 100]");
+
     // Convert inputs to percentage:
     start_x *= 0.01;
     start_y *= 0.01;
@@ -13,6 +17,11 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
     // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
     this->start_node = &m_Model.FindClosestNode(start_x, start_y);
     this->end_node = &m_Model.FindClosestNode(end_x, end_y);
+
+    if (start_node == nullptr)
+        throw EmptyNodeError("Start node is not initialized");
+    if (end_node == nullptr)
+        throw EmptyNodeError("End node is not initialized");
 }
 
 // TODO 3: Implement the CalculateHValue method.
@@ -22,6 +31,8 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node)
 {
+    if (node == nullptr)
+        throw EmptyNodeError("Node is empty in calculating H value");
     return node->distance(*end_node);
 }
 
@@ -34,6 +45,8 @@ float RoutePlanner::CalculateHValue(RouteModel::Node const *node)
 
 void RoutePlanner::AddNeighbors(RouteModel::Node *current_node)
 {
+    if (current_node == nullptr)
+        throw EmptyNodeError("Node is empty in adding neighbors");
     current_node->FindNeighbors();
     for (auto &node : current_node->neighbors)
     {
@@ -56,7 +69,9 @@ RouteModel::Node *RoutePlanner::NextNode()
 {
     RouteModel::Node *ls_node{nullptr};
     std::sort(open_list.begin(), open_list.end(), [](RouteModel::Node *n1, RouteModel::Node *n2)
-              { return n1->h_value + n1->g_value < n2->h_value + n2->g_value; });
+              { if(n1==nullptr or n2==nullptr) 
+                    throw EmptyNodeError("One of the open list nodes is empty");
+                return n1->h_value + n1->g_value < n2->h_value + n2->g_value; });
     ls_node = open_list[0];
     open_list.erase(open_list.begin());
     return ls_node;
@@ -79,6 +94,8 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
     // TODO: Implement your solution here.
     while (current_node != start_node)
     {
+        if (current_node == nullptr)
+            throw EmptyNodeError("Node is empty in final path construction");
         path_found.push_back(*current_node);
         distance += current_node->distance(*current_node->parent);
         current_node = current_node->parent;
@@ -105,6 +122,8 @@ void RoutePlanner::AStarSearch()
     // TODO: Implement your solution here.
     while (current_node != this->end_node)
     {
+        if (current_node == nullptr)
+            throw EmptyNodeError("Node is empty in search");
         this->AddNeighbors(current_node);
         current_node->visited = true;
         current_node = this->NextNode();

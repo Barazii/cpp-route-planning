@@ -8,6 +8,7 @@
 #include "route_model.h"
 #include "render.h"
 #include "route_planner.h"
+#include "exceptions.h"
 
 using namespace std::experimental;
 
@@ -59,7 +60,7 @@ int main(int argc, const char **argv)
     // TODO 1: Declare floats `start_x`, `start_y`, `end_x`, and `end_y` and get
     // user input for these values using std::cin. Pass the user input to the
     // RoutePlanner object below in place of 10, 10, 90, 90.
-    float x_start, y_start, x_end, y_end;
+    float x_start{-1}, y_start{-1}, x_end{-1}, y_end{-1};
     std::cout << "Enter x start position: ";
     std::cin >> x_start;
     std::cout << "Enter y start position: ";
@@ -73,10 +74,42 @@ int main(int argc, const char **argv)
     RouteModel model{osm_data};
 
     // Create RoutePlanner object and perform A* search.
-    RoutePlanner route_planner{model, x_start, y_start, x_end, y_end};
-    route_planner.AStarSearch();
+    while (true)
+    {
+        try
+        {
+            RoutePlanner route_planner{model, x_start, y_start, x_end, y_end};
+            route_planner.AStarSearch();
+            std::cout << "Distance: " << route_planner.GetDistance() << " meters. \n";
+            break;
+        }
+        catch (const InvalidCoordinatesError &e)
+        {
+            std::cout << e.what() << std::endl;
 
-    std::cout << "Distance: " << route_planner.GetDistance() << " meters. \n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            std::cout << "Enter x start position: ";
+            std::cin >> x_start;
+            std::cout << "Enter y start position: ";
+            std::cin >> y_start;
+            std::cout << "Enter x end position: ";
+            std::cin >> x_end;
+            std::cout << "Enter y end position: ";
+            std::cin >> y_end;
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << e.what() << std::endl;
+            return -1;
+        }
+        catch (...)
+        {
+            std::cout << "Unexpected error" << std::endl;
+            throw;
+        }
+    }
 
     // Render results of search.
     Render render{model};
