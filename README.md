@@ -1,6 +1,8 @@
 # Route Planning Project
 
-This repo contains the starter code for the Route Planning project from Accenture with the added solution. 
+## Overview
+
+This project is a modern C++17 route planner built on OpenStreetMap (OSM) data. It parses OSM XML data, constructs roads graph, and computes optimal routes using an A* search. Results are rendered via the C++ 2D graphics io2d/Cairo libraries. The project was developed using modular CMake build, unit tests, and CI via GitHub actions for automated builds and tests.
 
 <img src="map.png" width="600" height="450" />
 
@@ -29,8 +31,7 @@ The executable will be placed in the `build` directory. From within `build`, you
 ```
 ./OSM_A_star_search
 ```
-
-## Testing
+### Testing
 
 The testing executable is also placed in the `build` directory. From within `build`, you can run the unit tests as follows:
 ```
