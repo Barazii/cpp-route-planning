@@ -38,7 +38,9 @@ jobs:
         run: |
           mkdir -p ~/.cache/io2d
           pushd ~/.cache/io2d
-          if [ ! -d P0267_RefImpl ]; then
+          # If only the cached build dir exists, ensure we have the source, too
+          if [ ! -f P0267_RefImpl/CMakeLists.txt ]; then
+            rm -rf P0267_RefImpl
             git clone --depth 1 https://github.com/cpp-io2d/P0267_RefImpl.git
           fi
           cmake -S P0267_RefImpl -B P0267_RefImpl/build \
@@ -46,7 +48,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=/usr/local \
             -DIO2D_WITHOUT_SAMPLES=ON \
             -DIO2D_WITHOUT_TESTS=ON
-          sudo cmake --build P0267_RefImpl/build --target install -- -j$(nproc)
+          sudo cmake --build P0267_RefImpl/build --target install
           sudo ldconfig
           popd
 
@@ -54,7 +56,7 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
-        run: cmake --build build -- -j$(nproc)
+        run: cmake --build build
 
       - name: Run unit tests
         working-directory: build
