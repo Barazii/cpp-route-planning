@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake pkg-config git \
+            libcairo2-dev \
+            libpng-dev libjpeg-dev zlib1g-dev \
+            libfontconfig1-dev libx11-dev
+          # GraphicsMagick package name differs across Ubuntu versions
+          sudo apt-get install -y libgraphicsmagick-dev || sudo apt-get install -y libgraphicsmagick1-dev
+          # Optional TIFF (best-effort)
+          sudo apt-get install -y libtiff-dev || true
+
+      - name: Cache io2d build tree
+        id: cache-io2d
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/io2d/P0267_RefImpl/build
+          key: io2d-${{ runner.os }}-v1
+
+      - name: Build and install io2d
+        run: |
+          mkdir -p ~/.cache/io2d
+          pushd ~/.cache/io2d
+          if [ ! -d P0267_RefImpl ]; then
+            git clone --depth 1 https://github.com/cpp-io2d/P0267_RefImpl.git
+          fi
+          cmake -S P0267_RefImpl -B P0267_RefImpl/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DIO2D_WITHOUT_SAMPLES=ON \
+            -DIO2D_WITHOUT_TESTS=ON
+          sudo cmake --build P0267_RefImpl/build --target install -- -j$(nproc)
+          sudo ldconfig
+          popd
+
+      - name: Configure project
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build project
+        run: cmake --build build -- -j$(nproc)
+
+      - name: Run unit tests
+        working-directory: build
+        run: ./test
